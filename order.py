@@ -1,44 +1,26 @@
-from coffee import Coffee
-from customer import Customer
-
-
 class Order:
-    all_coffees = []
-    all_customers = []
+    all_orders = []  # Track all order instances
 
     def __init__(self, customer, coffee, price):
-        self.customer = customer
-        self.coffee = coffee
-        self.price = price
-        Order.all_coffees.append(coffee)
-        Order.all_customers.append(customer)
+        from customer import Customer  # Local import to avoid circular dependency
+        from coffee import Coffee  # Local import to avoid circular dependency
 
-    @property
-    def customer(self):
-        return self._customer
+        if not isinstance(customer, Customer):
+            raise TypeError("Customer must be an instance of Customer class")
+        if not isinstance(coffee, Coffee):
+            raise TypeError("Coffee must be an instance of Coffee class")
+        if not isinstance(price, float) or not (1.0 <= price <= 10.0):
+            raise ValueError("Price must be a float between 1.0 and 10.0")
 
-    @customer.setter
-    def customer(self, value):
-        if not isinstance(value, Customer):
-            raise TypeError("customer must be an instance of Customer class")
-        self._customer = value
-
-    @property
-    def coffee(self):
-        return self._coffee
-
-    @coffee.setter
-    def coffee(self, value):
-        if not isinstance(value, Coffee):
-            raise TypeError("coffee must be an instance of Coffee class")
-        self._coffee = value
+        self._customer = customer
+        self._coffee = coffee
+        self._price = price
+        Order.all_orders.append(self)  # Add the order to the class attribute list
 
     @property
     def price(self):
         return self._price
 
-    @price.setter
-    def price(self, value):
-        if not isinstance(value, float) or value < 1.0 or value > 10.0:
-            raise TypeError("price must be a float between 1.0 and 10.0")
-        self._price = value
+    def __repr__(self):
+        return (f"Order(customer={self._customer.name!r}, coffee={self._coffee.name!r}, "
+                f"price={self.price:.2f})")

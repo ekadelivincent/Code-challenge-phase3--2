@@ -1,30 +1,31 @@
-from order import Order
-
-
 class Coffee:
-    def __init__(self, name):
-        self.name = name
+    all_coffees = []  # Track all coffee instances
+
+    def __init__(self, name, price):
+        self._name = None  # Initialize to None for validation in setter
+        self.price = price
+        self.name = name  # Use property setter for validation
 
     @property
     def name(self):
+        """Get the coffee's name."""
         return self._name
 
     @name.setter
     def name(self, value):
+        #Set the coffee's name with validation. It should not be changeable after initialization.
+        if hasattr(self, '_name') and self._name is not None:
+            raise AttributeError("Cannot change coffee name after it is set.")
         if not isinstance(value, str) or len(value) < 3:
-            raise TypeError("Enter a valid coffee name")
+            raise ValueError("Coffee name must be a string with at least 3 characters.")
         self._name = value
+        Coffee.all_coffees.append(self)
 
-    def orders(self):
-        return [order for order in Order.all_coffees if order.coffee == self]
+    @classmethod
+    def display_menu(cls):
+        """Display a menu of all available coffee and their prices."""
+        menu = "\n".join(f"{coffee.name}: ${coffee.price:.2f}" for coffee in cls.all_coffees)
+        return menu or "No coffee available."
 
-    def customers(self):
-        return list(
-            {order.customer for order in Order.all_coffees if order.coffee == self}
-        )
-
-    def num_orders(self):
-        return len(self.orders())
-
-    def average_price(self):
-        return sum([order.price for order in self.orders()]) / len(self.orders())
+    def __repr__(self):
+        return f"Coffee(name={self.name!r}, price={self.price:.2f})"
